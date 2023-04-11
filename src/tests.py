@@ -62,7 +62,8 @@ def csv_test():
 
 def data_test():
     data = DATA(config.the['file'])
-    col = data.cols.x[1].col
+    col = data.cols.y[1].col
+    #print(col)
     print(col.lo, col.hi, lib.mid(col), lib.div(col))
     print(lib.stats(data)) 
 
@@ -143,14 +144,15 @@ def bins_test():
     result = discretization.bins(data.cols.x, {"best": best.rows, "rest": rest.rows})
     for t in result:
         for range in t:
-            if range.txt != b4: 
-                print("")
-            b4 = range.txt
-            print(range.txt,
-                  range.lo,
-                  range.hi,
-                  round(lib.value(range.y.has, len(best.rows), len(rest.rows), "best")),
-                  range.y.has)
+            if type(range) == 'RANGE.RANGE' :
+                if range.txt != b4: 
+                    print("")
+                b4 = range.txt
+                print(range.txt,
+                    range.lo,
+                    range.hi,
+                    round(lib.value(range.y.has, len(best.rows), len(rest.rows), "best")),
+                    range.y.has)
             
 
 def xpln_test():

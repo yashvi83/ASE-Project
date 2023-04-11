@@ -4,7 +4,7 @@ the = {
     'bins' : 16,
     'cliffs' : .147,
     'd' : .35,
-    'file' : '../../etc/data/auto93.csv',
+    'file' : '../etc/data/auto93.csv',
     'far' : .95,
     'go' : 'nothing',
     'help' : 'false',
@@ -26,7 +26,7 @@ OPTIONS:
   -b  --bins    initial number of bins       = 16
   -c  --cliffs  cliff's delta threshold      = .147
   -d  --d       different is over sd*d       = .35
-  -f  --file    data file                    = ../../etc/data/auto93.csv
+  -f  --file    data file                    = ../etc/data/auto93.csv
   -F  --Far     distance to distant          = .95
   -g  --go      start-up action              = nothing
   -h  --help    show help                    = false

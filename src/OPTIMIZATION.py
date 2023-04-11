@@ -13,5 +13,5 @@ def sway(data):
             for row in r:
                 worse.append(row)
             return worker(l, worse, evals + evals0, A)
-    best, rest, evals = worker(data.rows, [], 0)
+    best, rest, evals = worker(data.rows, [], 10)
     return DATA(data, best), DATA(data, rest), evals

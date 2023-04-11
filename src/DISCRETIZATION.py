@@ -20,9 +20,9 @@ def bins(cols, Rows):
                     col = col.col
                 x = row[col.at]
                 if x != "?":
-                    k = int(bin(col, float(x) if x != "?" else x))
-                    ranges[k] = ranges[k] if k in ranges else RANGE(col.at, col.txt, float(x) if x != "?" else x)
-                    update.extend(ranges[k], float(x), y)
+                    k = bin(col, x if x != "?" else x)
+                    ranges[k] = ranges[k] if k in ranges else RANGE(col.at, col.txt, x if x != "?" else x)
+                    update.extend(ranges[k], x, y)
         ranges = {key: value for key, value in sorted(ranges.items(), key=lambda x: x[1].lo)}
         newRanges = {}
         i = 0
@@ -41,7 +41,7 @@ def bin(col, x):
     if x=="?" or hasattr(col, "isSym"):
         return x
     tmp = (col.hi - col.lo)/(config.the["bins"] - 1)
-    return 1 if col.hi == col.lo else math.floor(x / tmp + 0.5) * tmp
+    return 1 if col.hi == col.lo else math.floor(float(x) / tmp + 0.5) * tmp
 
 
 def merges(ranges0):
@@ -49,7 +49,7 @@ def merges(ranges0):
         for j in range(1, len(t)):
             t[j].lo = t[j-1].hi
         t[0].lo = -float("inf")
-        t[-1].hi = float("inf")
+        t[len(t)-1].hi = float("inf")
         return t
     ranges1, j = [], 0
     while j < len(ranges0):

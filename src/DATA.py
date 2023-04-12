@@ -48,7 +48,8 @@ class DATA:
                 else:
                     x = float(x)
                     y = float(y)
-                    x, y = num.norm(col,x), num.norm(col,y)
+                    x = num.norm(col,x) if col.lo != col.hi else x
+                    y = num.norm(col,y)  if col.lo != col.hi else y
                 return abs(x - y)
 
         d, n = 0, 1 / float("inf")

@@ -98,10 +98,13 @@ def xpln(data, best, rest):
     for ranges in bins(data.cols.x, {"best": best.rows, "rest": rest.rows}):
         maxSizes[ranges[0].txt] = len(ranges)
         print("")
+        
         for range in ranges:
-            print(range.txt, range.lo, range.hi)
-            tmp.append({"range": range, "max": len(ranges), "val": v(range.y.has)})
-
+            print("range----", range)
+            if type(range) != int :
+                print(range.txt, range.lo, range.hi)
+                tmp.append({"range": range, "max": len(ranges), "val": v(range.y.has)})
+    print("tmp----", tmp)
     rule, most = firstN(sorted(tmp, key=lambda x: x["val"], reverse=True), score)
     return rule, most
 
@@ -110,7 +113,10 @@ def firstN(sortedRanges, scoreFun):
     print("")
     for r in sortedRanges:
         print(r["range"].txt, r["range"].lo, r["range"].hi, round(r["val"], 2), r["range"].y.has)
-    first = sortedRanges[0]["val"]
+    
+    if len(sortedRanges) > 0:
+        first = sortedRanges[0]["val"]
+
     def useful(range):
         if range["val"] > 0.05 and range["val"] > first / 10:
             return range
@@ -123,7 +129,7 @@ def firstN(sortedRanges, scoreFun):
 
         if tmp and tmp > most:
             out, most = rule, tmp
-
+    print("out", out)
     return out, most
 
 def showRule(rule):
@@ -151,8 +157,8 @@ def showRule(rule):
 def selects(rule, rows):
     def disjunction(ranges, row):
         for range in ranges:
-            lo = int(range['lo']) if isinstance(range['lo'], str) else range['lo']
-            hi = int(range['hi']) if isinstance(range['hi'], str) else range['hi']
+            lo = float(range['lo']) if isinstance(range['lo'], str) else range['lo']
+            hi = float(range['hi']) if isinstance(range['hi'], str) else range['hi']
             at = int(range['at'])
             x = row[at]
             if x == "?":

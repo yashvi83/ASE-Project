@@ -14,4 +14,7 @@ class NUM:
         self.w = -1 if self.txt.endswith("-") else 1
     
     def norm(self,num,n):
+        # print("num.lo", num.lo)
+        # print("num.hi", num.hi)
+        # print("(num.hi - num.lo + 1 / float)", (num.hi - num.lo + 1 / float("inf")))
         return n if n == "?" else (n - num.lo) / (num.hi - num.lo + 1 / float("inf"))

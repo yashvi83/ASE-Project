@@ -62,7 +62,7 @@ def csv_test():
 
 def data_test():
     data = DATA(config.the['file'])
-    col = data.cols.y[1].col
+    col = data.cols.y[0].col
     #print(col)
     print(col.lo, col.hi, lib.mid(col), lib.div(col))
     print(lib.stats(data)) 

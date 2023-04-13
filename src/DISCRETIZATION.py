@@ -1,5 +1,6 @@
 from copy import deepcopy
 import math
+
 from COL import COL
 import UPDATE as update
 from RANGE import *
@@ -100,9 +101,8 @@ def xpln(data, best, rest):
         print("")
         
         for range in ranges:
-            print("range----", range)
             if type(range) != int :
-                print(range.txt, range.lo, range.hi)
+                print("range.lo and range.hi",range.txt, range.lo, range.hi)
                 tmp.append({"range": range, "max": len(ranges), "val": v(range.y.has)})
     print("tmp----", tmp)
     rule, most = firstN(sorted(tmp, key=lambda x: x["val"], reverse=True), score)
@@ -153,21 +153,31 @@ def showRule(rule):
         return t if len(t0) == len(t) else merge(t)
     return lib.kap(rule, merges)
 
-
+def is_float(element: any) -> bool:
+    #If you expect None to be passed:
+    if element is None: 
+        return False
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
+    
 def selects(rule, rows):
     def disjunction(ranges, row):
         for range in ranges:
-            lo = float(range['lo']) if isinstance(range['lo'], str) else range['lo']
-            hi = float(range['hi']) if isinstance(range['hi'], str) else range['hi']
-            at = int(range['at'])
-            x = row[at]
-            if x == "?":
-                return True
-            x = float(x)
-            if lo == hi and lo == x:
-                return True
-            if lo <= x and x < hi:
-                return True
+                if is_float(range['lo']):
+                    lo = float(range['lo']) if isinstance(range['lo'], str) else range['lo']
+                    hi = float(range['hi']) if isinstance(range['hi'], str) else range['hi']
+                    at = int(range['at'])
+                    x = row[at]
+                    if x == "?":
+                        return True
+                    x = float(x)
+                    if lo == hi and lo == x:
+                        return True
+                    if lo <= x and x < hi:
+                        return True
         return False
 
     def conjunction(row):

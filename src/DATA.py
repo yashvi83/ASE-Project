@@ -84,14 +84,17 @@ class DATA:
             return self.dist(data, r1, r2, cols)
 
         def cos(a, b, c):
-            return (a ** 2 + c ** 2 - b ** 2) / (2 * c)
-
+            if c != 0:
+                return (a ** 2 + c ** 2 - b ** 2) / (2 * c)
+            else:
+                return (a ** 2 + c ** 2 - b ** 2) / (2 * 0.00001)
         def proj(r):
             return {'row': r, 'x': cos(gap(r, A), gap(r, B), c)}
 
         rows = rows or self.rows
         some = lib.many(rows, config.the["Halves"])
-        A = above if config.the["Reuse"] else lib.any(some)
+        A = above if above and config.the["Reuse"] else lib.any(some)
+   
         tmp = sorted([{"row": r, "d": gap(r, A)} for r in some], key=lambda x: x["d"])
         far = tmp[int((len(tmp)) * config.the["Far"])]
         B, c = far["row"], far["d"]

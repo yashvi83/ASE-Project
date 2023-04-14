@@ -91,21 +91,33 @@ def xpln(data, best, rest):
         rule = RULE.ruleF(ranges, maxSizes)
         if rule:
             #print(showRule(rule))
+
             bestr= selects(rule, best.rows)
             restr= selects(rule, rest.rows)
+
+            print("best rows ---------",  bestr)
+
             if len(bestr) + len(restr) > 0:
+                
                 return v({"best": len(bestr), "rest": len(restr)}), rule
+        
+        return None, None
+
     tmp, maxSizes = [], {}
     for ranges in bins(data.cols.x, {"best": best.rows, "rest": rest.rows}):
         maxSizes[ranges[0].txt] = len(ranges)
         print("")
         
+        if (type(ranges) != list):
+            ranges = list(ranges.values()) 
+
         for range in ranges:
             if type(range) != int :
                 print("range.lo and range.hi",range.txt, range.lo, range.hi)
                 tmp.append({"range": range, "max": len(ranges), "val": v(range.y.has)})
-    print("tmp----", tmp)
+
     rule, most = firstN(sorted(tmp, key=lambda x: x["val"], reverse=True), score)
+    
     return rule, most
 
 
@@ -123,13 +135,17 @@ def firstN(sortedRanges, scoreFun):
 
     sortedRanges = list(filter(useful, sortedRanges))
     most, out = -1, None
+    print("sortedRanges---", sortedRanges)
 
     for n in range(len(sortedRanges)):
         tmp, rule = scoreFun([r["range"] for r in sortedRanges[:n + 1]]) or (None, None)
+        
+        print("tmp--.-.-.-", tmp)
+        print("rule--.-.-.-", rule)
 
         if tmp and tmp > most:
             out, most = rule, tmp
-    print("out", out)
+    print("OUT-------.-.-.-", out)
     return out, most
 
 def showRule(rule):
@@ -153,8 +169,9 @@ def showRule(rule):
         return t if len(t0) == len(t) else merge(t)
     return lib.kap(rule, merges)
 
+
 def is_float(element: any) -> bool:
-    #If you expect None to be passed:
+
     if element is None: 
         return False
     try:
@@ -165,8 +182,11 @@ def is_float(element: any) -> bool:
     
 def selects(rule, rows):
     def disjunction(ranges, row):
-        for range in ranges:
+        if ranges:
+            for range in ranges:
                 if is_float(range['lo']):
+                    # print("range in ranges in select----", range)
+
                     lo = float(range['lo']) if isinstance(range['lo'], str) else range['lo']
                     hi = float(range['hi']) if isinstance(range['hi'], str) else range['hi']
                     at = int(range['at'])
@@ -178,7 +198,7 @@ def selects(rule, rows):
                         return True
                     if lo <= x and x < hi:
                         return True
-        return False
+            return False
 
     def conjunction(row):
         for ranges in rule.values():
@@ -186,4 +206,5 @@ def selects(rule, rows):
                 return False
         return True
 
+    print("[r for r in rows if conjunction(r)]",[r for r in rows if conjunction(r)])
     return [r for r in rows if conjunction(r)]

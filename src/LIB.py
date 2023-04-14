@@ -58,15 +58,17 @@ class LIB:
     
     def kap(self, t, fun):
         u = {}
-
+        items = []
         if isinstance(t, list):
             items = enumerate(t)
         else:
-            items = t.items()
-
-        for k, v in items:
-                v, k = fun(k, v)
-                u[k or len(u)+1] = v
+            print("type of t",type(t))
+            if(hasattr(t,"items")):
+                items = t.items()
+        if(type(items)!=None):
+            for k, v in items:
+                    v, k = fun(k, v)
+                    u[k or len(u)+1] = v
         return u
 
     def show(self,node,what=None,cols=None,nPlaces=None,lvl=0):

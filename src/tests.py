@@ -62,10 +62,9 @@ def csv_test():
 
 def data_test():
     data = DATA(config.the['file'])
-    col = data.cols.y[0].col
-    #print(col)
-    print(col.lo, col.hi, lib.mid(col), lib.div(col))
-    print(lib.stats(data)) 
+    # col = data.cols.x[2].col
+    # print(col.lo, col.hi, lib.mid(col), lib.div(col))
+    # print(lib.stats(data)) 
 
 def clone_test():
     data1 = DATA(config.the['file'])
@@ -139,20 +138,23 @@ def sway_test():
 def bins_test():
     data = DATA(config.the['file'])
     best,rest,_ = OPTIMIZATION.sway(data)
+    # print("best",best.rows)
+    # print("rest",rest.rows)
+
     b4 = None
     print("all","","","", "{best= " + str(len(best.rows)) + ", rest= " + str(len(rest.rows)) + "}")
     result = discretization.bins(data.cols.x, {"best": best.rows, "rest": rest.rows})
     for t in result:
         for range in t:
-            if type(range) == 'RANGE.RANGE' :
+            if(hasattr(range, "txt")):
                 if range.txt != b4: 
                     print("")
                 b4 = range.txt
-                print(range.txt,
-                    range.lo,
-                    range.hi,
-                    round(lib.value(range.y.has, len(best.rows), len(rest.rows), "best")),
-                    range.y.has)
+                # print(range.txt,
+                #     range.lo,
+                #     range.hi,
+                #     round(lib.value(range.y.has, len(best.rows), len(rest.rows), "best")),
+                #     range.y.has)
             
 
 def xpln_test():

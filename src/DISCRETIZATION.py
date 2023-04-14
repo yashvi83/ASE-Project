@@ -1,6 +1,5 @@
 from copy import deepcopy
 import math
-
 from COL import COL
 import UPDATE as update
 from RANGE import *
@@ -10,6 +9,15 @@ import config
 import RULE as RULE
 lib = LIB()
 
+def is_float(element: any) -> bool:
+
+    if element is None: 
+        return False
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
 
 def bins(cols, Rows):
     res = []
@@ -17,12 +25,13 @@ def bins(cols, Rows):
         ranges = {}
         for y, rows in Rows.items():
             for row in rows:
+                #print("row in bins:",row)
                 if (isinstance(col, COL)):
                     col = col.col
                 x = row[col.at]
-                if x != "?":
+                if x != "?" and is_float(x):
                     k = bin(col, x if x != "?" else x)
-                    ranges[k] = ranges[k] if k in ranges else RANGE(col.at, col.txt, x if x != "?" else x)
+                    ranges[k] = ranges[k] if k in ranges else RANGE(col.at, col.txt, x)
                     update.extend(ranges[k], x, y)
         ranges = {key: value for key, value in sorted(ranges.items(), key=lambda x: x[1].lo)}
         newRanges = {}
@@ -91,61 +100,44 @@ def xpln(data, best, rest):
         rule = RULE.ruleF(ranges, maxSizes)
         if rule:
             #print(showRule(rule))
-
             bestr= selects(rule, best.rows)
             restr= selects(rule, rest.rows)
-
-            print("best rows ---------",  bestr)
-
             if len(bestr) + len(restr) > 0:
-                
                 return v({"best": len(bestr), "rest": len(restr)}), rule
-        
-        return None, None
-
     tmp, maxSizes = [], {}
+    #print("res:",bins(data.cols.x, {"best": best.rows, "rest": rest.rows}))
     for ranges in bins(data.cols.x, {"best": best.rows, "rest": rest.rows}):
-        maxSizes[ranges[0].txt] = len(ranges)
-        print("")
-        
-        if (type(ranges) != list):
-            ranges = list(ranges.values()) 
-
-        for range in ranges:
-            if type(range) != int :
-                print("range.lo and range.hi",range.txt, range.lo, range.hi)
-                tmp.append({"range": range, "max": len(ranges), "val": v(range.y.has)})
-
+        if(len(ranges)!=0):
+            maxSizes[ranges[0].txt] = len(ranges)
+            print("")
+            for range in ranges:
+                if(hasattr(range,"txt")):
+                    print(range.txt, range.lo, range.hi)
+                    tmp.append({"range": range, "max": len(ranges), "val": v(range.y.has)})
+    print("tmp",tmp)
     rule, most = firstN(sorted(tmp, key=lambda x: x["val"], reverse=True), score)
-    
     return rule, most
 
 
 def firstN(sortedRanges, scoreFun):
     print("")
-    for r in sortedRanges:
-        print(r["range"].txt, r["range"].lo, r["range"].hi, round(r["val"], 2), r["range"].y.has)
-    
-    if len(sortedRanges) > 0:
+    if(len(sortedRanges)!=0):
+        for r in sortedRanges:
+            print(r["range"].txt, r["range"].lo, r["range"].hi, round(r["val"], 2), r["range"].y.has)
         first = sortedRanges[0]["val"]
-
     def useful(range):
         if range["val"] > 0.05 and range["val"] > first / 10:
             return range
 
     sortedRanges = list(filter(useful, sortedRanges))
     most, out = -1, None
-    print("sortedRanges---", sortedRanges)
 
     for n in range(len(sortedRanges)):
         tmp, rule = scoreFun([r["range"] for r in sortedRanges[:n + 1]]) or (None, None)
-        
-        print("tmp--.-.-.-", tmp)
-        print("rule--.-.-.-", rule)
 
         if tmp and tmp > most:
             out, most = rule, tmp
-    print("OUT-------.-.-.-", out)
+
     return out, most
 
 def showRule(rule):
@@ -154,8 +146,8 @@ def showRule(rule):
 
     def merges(attr, ranges):
         print("ranges",ranges)
-        print("Map:", map(pretty, merge(sorted(ranges, key=lambda r: r['lo']))))
-        return list(map(pretty, merge(sorted(ranges, key=lambda r: r['lo'])))), attr
+        print("Map:", map(pretty, merge(sorted(ranges, key=lambda r: float(r['lo'])))))
+        return list(map(pretty, merge(sorted(ranges, key=lambda r: float(r['lo']))))), attr
 
     def merge(t0):
         t, j = [], 0
@@ -170,26 +162,13 @@ def showRule(rule):
     return lib.kap(rule, merges)
 
 
-def is_float(element: any) -> bool:
-
-    if element is None: 
-        return False
-    try:
-        float(element)
-        return True
-    except ValueError:
-        return False
-    
 def selects(rule, rows):
     def disjunction(ranges, row):
-        if ranges:
+        if(type(ranges)!=None):
             for range in ranges:
-                if is_float(range['lo']):
-                    # print("range in ranges in select----", range)
-
-                    lo = float(range['lo']) if isinstance(range['lo'], str) else range['lo']
-                    hi = float(range['hi']) if isinstance(range['hi'], str) else range['hi']
-                    at = int(range['at'])
+                    lo = int(float(range['lo'])) if isinstance(range['lo'], str) else range['lo']
+                    hi = int(float(range['hi'])) if isinstance(range['hi'], str) else range['hi']
+                    at = int(float(range['at']))
                     x = row[at]
                     if x == "?":
                         return True
@@ -198,13 +177,13 @@ def selects(rule, rows):
                         return True
                     if lo <= x and x < hi:
                         return True
-            return False
+        return False
 
     def conjunction(row):
-        for ranges in rule.values():
-            if not disjunction(ranges, row):
-                return False
+        if(hasattr(rule,"values")):
+            for ranges in rule.values():
+                if not disjunction(ranges, row):
+                    return False
         return True
 
-    print("[r for r in rows if conjunction(r)]",[r for r in rows if conjunction(r)])
     return [r for r in rows if conjunction(r)]

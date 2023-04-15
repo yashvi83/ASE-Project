@@ -7,3 +7,5 @@ class RANGE:
         self.lo = lo
         self.hi = lo if lo else hi if hi else lo
         self.y = SYM()
+        # print("PRINTING RANGE------txt, lo, at-----", self.txt, self.lo, self.at)
+        

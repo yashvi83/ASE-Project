@@ -9,3 +9,4 @@ class COL:
         self.isIgnored  = self.col.txt.endswith("X")
         self.isKlass    = self.col.txt.endswith("!") 
         self.isGoal     = self.col.txt[-1] in ["!", "+", "-"]
+        # print("Type of columns-----:_:_:_:_:_:", s[0], type(self.col))

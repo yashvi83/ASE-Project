@@ -11,7 +11,8 @@ import RULE as RULE
 lib = LIB()
 
 
-def bins(cols, Rows):
+def bins(cols, Rows, test_for = 'bins'):
+
     res = []
     for col in cols:
         ranges = {}
@@ -20,10 +21,20 @@ def bins(cols, Rows):
                 if (isinstance(col, COL)):
                     col = col.col
                 x = row[col.at]
+                # added an extra check for is_float here------
                 if x != "?":
-                    k = bin(col, x if x != "?" else x)
-                    ranges[k] = ranges[k] if k in ranges else RANGE(col.at, col.txt, x if x != "?" else x)
-                    update.extend(ranges[k], x, y)
+                    if test_for == 'bins':
+                        k = bin(col, x if x != "?" else x)
+                        ranges[k] = ranges[k] if k in ranges else RANGE(col.at, col.txt, x if x != "?" else x)
+                        update.extend(ranges[k], x, y)
+                    else:
+                        if is_float(x):
+                            k = bin(col, x if x != "?" else x)
+                            ranges[k] = ranges[k] if k in ranges else RANGE(col.at, col.txt, x if x != "?" else x)
+                            update.extend(ranges[k], x, y)
+
+                
+
         ranges = {key: value for key, value in sorted(ranges.items(), key=lambda x: x[1].lo)}
         newRanges = {}
         i = 0
@@ -31,10 +42,15 @@ def bins(cols, Rows):
             newRanges[i] = ranges[key]
             i += 1
         newRangesList = []
+        # print("ITEM IN BINS......[[[[[.[[[[.....]]]]]]]]]", newRanges)
         if hasattr(col, "isSym") and col.isSym:
             for item in newRanges.values():
+                
                 newRangesList.append(item)
-        res.append(newRangesList if hasattr(col, "isSym") and col.isSym else merges(newRanges))
+        
+        res.append((newRangesList) if hasattr(col, "isSym") and col.isSym else merges(newRanges))
+        # print("X--------", res)
+
     return res
 
 def bin(col, x):
@@ -94,9 +110,7 @@ def xpln(data, best, rest):
 
             bestr= selects(rule, best.rows)
             restr= selects(rule, rest.rows)
-
-            print("best rows ---------",  bestr)
-
+            # print("bestr in score<><><><><><><><><><><><><><><><><><>", bestr)
             if len(bestr) + len(restr) > 0:
                 
                 return v({"best": len(bestr), "rest": len(restr)}), rule
@@ -104,17 +118,22 @@ def xpln(data, best, rest):
         return None, None
 
     tmp, maxSizes = [], {}
-    for ranges in bins(data.cols.x, {"best": best.rows, "rest": rest.rows}):
-        maxSizes[ranges[0].txt] = len(ranges)
-        print("")
-        
-        if (type(ranges) != list):
-            ranges = list(ranges.values()) 
 
-        for range in ranges:
-            if type(range) != int :
-                print("range.lo and range.hi",range.txt, range.lo, range.hi)
-                tmp.append({"range": range, "max": len(ranges), "val": v(range.y.has)})
+    for ranges in bins(data.cols.x, {"best": best.rows, "rest": rest.rows}, 'xpln'):
+        print("RANGES IN  bins-.-.-.-.-.-.-.-.-.-----", ranges)
+
+        #extra check to see if ranges is not empty
+        if len(ranges) > 0:
+            maxSizes[ranges[0].txt] = len(ranges)
+            print("")
+        
+            if (type(ranges) != list):
+                ranges = list(ranges.values()) 
+
+            for range in ranges:
+                if type(range) != int :
+                    print("range.lo and range.hi",range.txt, range.lo, range.hi)
+                    tmp.append({"range": range, "max": len(ranges), "val": v(range.y.has)})
 
     rule, most = firstN(sorted(tmp, key=lambda x: x["val"], reverse=True), score)
     
@@ -135,27 +154,23 @@ def firstN(sortedRanges, scoreFun):
 
     sortedRanges = list(filter(useful, sortedRanges))
     most, out = -1, None
-    print("sortedRanges---", sortedRanges)
 
     for n in range(len(sortedRanges)):
         tmp, rule = scoreFun([r["range"] for r in sortedRanges[:n + 1]]) or (None, None)
-        
-        print("tmp--.-.-.-", tmp)
-        print("rule--.-.-.-", rule)
-
         if tmp and tmp > most:
             out, most = rule, tmp
-    print("OUT-------.-.-.-", out)
     return out, most
 
 def showRule(rule):
     def pretty(range):
-        return range['lo'] if range['lo'] == range['hi'] else [range['lo'], range['hi']]
+        x = float(range['lo']) if float(range['lo']) == float(range['hi']) else [float(range['lo']), float(range['hi'])]
+        print("X--..", range['hi'])
+        return x
 
     def merges(attr, ranges):
         print("ranges",ranges)
-        print("Map:", map(pretty, merge(sorted(ranges, key=lambda r: r['lo']))))
-        return list(map(pretty, merge(sorted(ranges, key=lambda r: r['lo'])))), attr
+        print("Map:", map(pretty, merge(sorted(ranges, key=lambda r: float(r['lo'])))))
+        return list(map(pretty, merge(sorted(ranges, key=lambda r: float(r['lo']))))), attr
 
     def merge(t0):
         t, j = [], 0
@@ -184,7 +199,8 @@ def selects(rule, rows):
     def disjunction(ranges, row):
         if ranges:
             for range in ranges:
-                if is_float(range['lo']):
+                
+                if is_float(range['lo']) and is_float(range['hi']):
                     # print("range in ranges in select----", range)
 
                     lo = float(range['lo']) if isinstance(range['lo'], str) else range['lo']
@@ -194,17 +210,26 @@ def selects(rule, rows):
                     if x == "?":
                         return True
                     x = float(x)
-                    if lo == hi and lo == x:
+                    # print("---lo and hi values---", (lo), (x), (hi))
+                    # This was for coc1000 changeing = sign comparison
+
+                    if lo == hi == x:
                         return True
-                    if lo <= x and x < hi:
+                    if lo <= x < hi or lo < x <= hi :
                         return True
+                    
+                    
             return False
 
     def conjunction(row):
         for ranges in rule.values():
+            
             if not disjunction(ranges, row):
+                
                 return False
+
         return True
 
-    print("[r for r in rows if conjunction(r)]",[r for r in rows if conjunction(r)])
+    # print("[r for r in rows if conjunction(r)]",[r for r in rows if conjunction(r)])
+    
     return [r for r in rows if conjunction(r)]

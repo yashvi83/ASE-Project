@@ -30,11 +30,15 @@ def add(col, x, n = None):
     if x != "?":
         n = n or 1
         col.n += n
+        # print("COL-----col-----", col.txt, hasattr(col, "isSym")), 
         if hasattr(col, "isSym") and col.isSym:
             sym(col.has)
+            
         else:
             x = float(x)
-            num(col.has)  
+            num(col.has) 
+
+    # return x 
 
 def adds(col, t):
     for value in t or []:

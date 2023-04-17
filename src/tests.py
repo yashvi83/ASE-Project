@@ -146,7 +146,7 @@ def bins_test():
     result = discretization.bins(data.cols.x, {"best": best.rows, "rest": rest.rows})
     for t in result:
         for range in t:
-            if(hasattr(range, "txt")):
+            if(hasattr(range, "txt")):  
                 if range.txt != b4: 
                     print("")
                 b4 = range.txt
@@ -158,15 +158,19 @@ def bins_test():
             
 
 def xpln_test():
-    data = DATA(config.the['file'])
-    best, rest, evals = OPTIMIZATION.sway(data)
-    rule, _ = discretization.xpln(data, best, rest)
-    print("\n-----------\nexplain=", discretization.showRule(rule))
-    data1 = DATA(data, discretization.selects(rule, data.rows))
-    print("all        ", lib.stats(data), lib.stats(data, None, lib.div))
-    print(f"sway with   {evals} evals", lib.stats(best), lib.stats(best, None, lib.div))
-    print(f"xpln on     {evals} evals", lib.stats(data1), lib.stats(data1, None, lib.div))
-    top, _ = lib.betters(data, len(best.rows))
-    top = DATA(data, top)
-    print(f"sort with {len(data.rows)} evals", lib.stats(top), lib.stats(top, None, lib.div))
+    count =0
+    while count < 20:
+        data = DATA(config.the['file'])
+        best, rest, evals = OPTIMIZATION.sway(data)
+        rule, _ = discretization.xpln(data, best, rest)
+        print("\n-----------\nexplain=", discretization.showRule(rule))
+        data1 = DATA(data, discretization.selects(rule, data.rows))
+        print("all        ", lib.stats(data), lib.stats(data, None, lib.div))
+        print(f"sway with   {evals} evals", lib.stats(best), lib.stats(best, None, lib.div))
+        print(f"xpln on     {evals} evals", lib.stats(data1), lib.stats(data1, None, lib.div))
+        top, _ = lib.betters(data, len(best.rows))
+        top = DATA(data, top)
+        print(f"sort with {len(data.rows)} evals", lib.stats(top), lib.stats(top, None, lib.div))
+
+        #count +=1
 

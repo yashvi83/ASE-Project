@@ -109,21 +109,21 @@ def xpln(data, best, rest):
     for ranges in bins(data.cols.x, {"best": best.rows, "rest": rest.rows}):
         if(len(ranges)!=0):
             maxSizes[ranges[0].txt] = len(ranges)
-            print("")
+            #print("")
             for range in ranges:
                 if(hasattr(range,"txt")):
-                    print(range.txt, range.lo, range.hi)
+                    #print(range.txt, range.lo, range.hi)
                     tmp.append({"range": range, "max": len(ranges), "val": v(range.y.has)})
-    print("tmp",tmp)
+    #print("tmp",tmp)
     rule, most = firstN(sorted(tmp, key=lambda x: x["val"], reverse=True), score)
     return rule, most
 
 
 def firstN(sortedRanges, scoreFun):
-    print("")
+    #print("")
     if(len(sortedRanges)!=0):
-        for r in sortedRanges:
-            print(r["range"].txt, r["range"].lo, r["range"].hi, round(r["val"], 2), r["range"].y.has)
+        # for r in sortedRanges:
+        #     print(r["range"].txt, r["range"].lo, r["range"].hi, round(r["val"], 2), r["range"].y.has)
         first = sortedRanges[0]["val"]
     def useful(range):
         if range["val"] > 0.05 and range["val"] > first / 10:
@@ -145,8 +145,6 @@ def showRule(rule):
         return range['lo'] if range['lo'] == range['hi'] else [range['lo'], range['hi']]
 
     def merges(attr, ranges):
-        print("ranges",ranges)
-        print("Map:", map(pretty, merge(sorted(ranges, key=lambda r: float(r['lo'])))))
         return list(map(pretty, merge(sorted(ranges, key=lambda r: float(r['lo']))))), attr
 
     def merge(t0):

@@ -1,11 +1,13 @@
 global the, Help, Seed
 
 the = {
+    "bootstrap" : 512, 
+    "conf" : 0.05,
     'bins' : 16,
     'cliffs' : .147,
     'd' : .35,
-    'file' : '../etc/data/auto93.csv',
-    'far' : .95,
+    'file' : '../etc/data/nasa93dem.csv',
+    'Far' : .95,
     'go' : 'nothing',
     'help' : 'false',
     'Halves' : 512,
@@ -18,7 +20,7 @@ the = {
 }
 help = """
 xpln: multi-goal semi-supervised explanation
-(c) Group 9
+
   
 USAGE: python3 main.py [OPTIONS] [-g ACTIONS]
   

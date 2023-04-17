@@ -14,6 +14,7 @@ lo = float('inf')
 hi = float('-inf')
 
 seed = 937162211
+smallPositive = 1E-32
 class LIB:
     def __init__(self):
         pass
@@ -94,7 +95,6 @@ class LIB:
         else:
             col.has.sort()
         col.ok = True
-        
         return col.has
 
     def per(self, t, p):
@@ -157,6 +157,22 @@ class LIB:
         range.hi = max(n,range.hi)
         self.add(range.y,s)
 
+    def delta(self,i, other):
+        global smallPositive
+        e, y, z = smallPositive, i, other
+        #if(y.n !=0 and z.n != 0):
+        return abs(y.mu - z.mu) / (math.sqrt(e + y.sd ** 2 / (y.n+0.0000000000001) + z.sd ** 2 / (z.n+0.0000000000001)))
+    
+    def samples(self, t, n = None):
+        u = []
+        if n is None: 
+            for i in range(1, len(t)): 
+                u.append(random.choice(t))
+        else: 
+            for i in range(1, n): 
+                u.append(random.choice(t))
+        return u
+
     def cliffsDelta(self,ns1, ns2):
 
         if len(ns1) > 256:
@@ -180,8 +196,32 @@ class LIB:
                 if x > y: gt = gt + 1 
                 if x < y: lt = lt + 1
 
-        return abs(lt - gt)/n > .147
+        return abs(lt - gt)/n <= .147
     
+    def bootstrap(self, y0, z0):
+        x, y, z, yhat, zhat = NUM(), NUM(), NUM(), [], []
+        for y1 in y0:
+            NUM.add(x, y1)
+            NUM.add(y, y1)
+        for z1 in z0:
+            NUM.add(x, z1)
+            NUM.add(z, z1)
+        xmu, ymu, zmu = x.mu, y.mu, z.mu
+        for y1 in y0: 
+            yhat.append(y1 - ymu + xmu)
+        for z1 in z0: 
+            zhat.append(z1 - zmu + xmu)
+
+        tobs = self.delta(y, z)
+        #print("tobs",tobs)
+        n = 0
+        for i in range(config.the['bootstrap']):
+            if (self.delta(NUM(t=self.samples(yhat)), NUM(t=self.samples(zhat))) > tobs):
+                n = n + 1
+        #print("after boot", n)
+        return n / config.the['bootstrap'] >= config.the['conf']
+
+
     def better(self,data, row1, row2):
 
         s1, s2, ys = 0, 0, data.cols.y

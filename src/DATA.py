@@ -23,6 +23,13 @@ class DATA:
     def new(self):
         return {"rows": [], "cols": None}
     
+    def stats(self, nPlaces=2, what="mid", cols = None):
+        def fun(k, col):
+            mid = getattr(col,what or "mid")
+            rounded = round(float(mid()),nPlaces)
+            return (rounded,col.txt)
+        return lib.kap(cols or self.cols.y,fun)
+    
     def read(self,sfile,data = None):
         data = DATA()
         callback = lambda t: UPDATE.row(data, t)

@@ -10,7 +10,7 @@ the = {
     'help' : 'false',
     'Halves' : 512,
     'min' : .5,
-    'Max': 512,
+    'Max': 512, 
     'p' : 2,
     'rest' : 4,
     'Reuse' : False,
@@ -26,7 +26,7 @@ OPTIONS:
   -b  --bins    initial number of bins       = 16
   -c  --cliffs  cliff's delta threshold      = .147
   -d  --d       different is over sd*d       = .35
-  -f  --file    data file                    = ../etc/data/nasa93dem.csv
+  -f  --file    data file                    = ../etc/data/SSM.csv
   -F  --Far     distance to distant          = .95
   -g  --go      start-up action              = nothing
   -h  --help    show help                    = false

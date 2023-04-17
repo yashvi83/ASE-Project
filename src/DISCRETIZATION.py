@@ -165,18 +165,21 @@ def showRule(rule):
 def selects(rule, rows):
     def disjunction(ranges, row):
         if(type(ranges)!=None):
-            for range in ranges:
-                    lo = int(float(range['lo'])) if isinstance(range['lo'], str) else range['lo']
-                    hi = int(float(range['hi'])) if isinstance(range['hi'], str) else range['hi']
-                    at = int(float(range['at']))
-                    x = row[at]
-                    if x == "?":
-                        return True
-                    x = float(x)
-                    if lo == hi and lo == x:
-                        return True
-                    if lo <= x and x < hi:
-                        return True
+            try:
+                for range in ranges:
+                        lo = int(float(range['lo'])) if isinstance(range['lo'], str) else range['lo']
+                        hi = int(float(range['hi'])) if isinstance(range['hi'], str) else range['hi']
+                        at = int(float(range['at']))
+                        x = row[at]
+                        if x == "?":
+                            return True
+                        x = float(x)
+                        if lo == hi and lo == x:
+                            return True
+                        if lo <= x and x < hi:
+                            return True
+            except:
+                print("")
         return False
 
     def conjunction(row):

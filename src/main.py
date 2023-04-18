@@ -48,6 +48,7 @@ def get_stats(data_array):
     return res
 
 def main(options,help):    
+        
         results = {"all": [], "sway": [], "xpln": [], "top": []}
         n_evals = {"all": 0, "sway": 0, "xpln": 0, "top": 0}
 
@@ -65,16 +66,15 @@ def main(options,help):
             rule = None
             while(rule==None):
                 best,rest,evals = OPTIMIZATION.sway(data)
-
+                
                 rule, _ = discretization.xpln(data, best, rest)
-
+                
             #if rule != -1:
             data1 = DATA(data, discretization.selects(rule, data.rows))
             
             results['all'].append(data)
             results['sway'].append(best)
             results['xpln'].append(data1)
-
             top, _ = lib.betters(data, len(best.rows))
             top = DATA(data, top)
             results['top'].append(top)
@@ -83,7 +83,7 @@ def main(options,help):
             n_evals["sway"] += evals
             n_evals["xpln"] += evals
             n_evals["top"] += len(data.rows)
-            
+        
             for i in range(len(comparisons)):
                     
                     [base, diff], result = comparisons[i]

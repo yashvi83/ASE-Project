@@ -3,6 +3,9 @@ from COLS import COLS
 import UPDATE
 import config
 from NUM import NUM
+from sklearn.cluster import KMeans
+import numpy as np
+from ROW import ROW
 
 num = NUM()
 lib = LIB()
@@ -114,6 +117,43 @@ class DATA:
         evals = 1 if (hasattr(config.the, "Reuse") and above) else 2
         return left, right, A, B,c, evals
     
+    def half_kmeans(self, data,rows=None, cols=None, above=None):
+        left, right = [], []
+        if not rows:
+            rows = self.rows
+
+        rows_numpy = np.array([r.cells for r in rows])
+        kmeans = KMeans(n_clusters=2, random_state=config.the['seed'], n_init=10).fit(rows_numpy)
+        
+        lc = ROW(kmeans.cluster_centers_[0])
+        rc = ROW(kmeans.cluster_centers_[1])
+        A = None
+        B = None
+
+        def calc_min(center, row, A):
+            if not A:
+                A = row
+            if self.dist(A, center) > self.dist(A, row):
+                return row
+            else:
+                return A
+
+        for idx, label in enumerate(kmeans.labels_):
+            if label == 0:
+                A = calc_min(lc, rows[idx], A)
+                left.append(rows[idx])
+            else:
+                B = calc_min(rc, rows[idx], B)
+                right.append(rows[idx])
+
+        return left, right, A, B
+
+
+
+
+
+
+
 
     def tree(self,data,rows = None,cols = None,above = None):
         rows = rows or data.rows

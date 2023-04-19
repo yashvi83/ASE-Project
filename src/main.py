@@ -49,39 +49,48 @@ def get_stats(data_array):
 
 def main(options,help):    
         
-        results = {"all": [], "sway": [], "xpln": [], "top": []}
-        n_evals = {"all": 0, "sway": 0, "xpln": 0, "top": 0}
+        results = {"all": [], "sway": [], "sway2":[],"xpln": [],"xpln2":[], "top": []}
+        n_evals = {"all": 0, "sway": 0, "sway2": 0, "xpln": 0, "xpln2": 0, "top": 0}
 
         comparisons = [
             [["all", "all"], None],
             [["all", "sway"], None],
+            [["all", "sway2"], None],
+            [["sway", "sway2"], None],
             [["sway", "xpln"], None],
+            [["sway2", "xpln2"], None],
             [["sway", "top"], None]
         ]
         count = 0
         data = None
 
-        while count < 2:
+        while count < 20:
             data = DATA(config.the['file'])
             rule = None
             while(rule==None):
                 best,rest,evals = OPTIMIZATION.sway(data)
-                
                 rule, _ = discretization.xpln(data, best, rest)
+
+                best2,rest2,evals_2 = OPTIMIZATION.sway(data)
+                rule2,_ = discretization.xpln(data,best2,rest2)
                 
             #if rule != -1:
             data1 = DATA(data, discretization.selects(rule, data.rows))
-            
+            data2 = DATA(data,discretization.selects(rule2,data.rows))
             results['all'].append(data)
             results['sway'].append(best)
             results['xpln'].append(data1)
+            results['sway2'].append(best2)
+            results['xpln2'].append(data2)
             top, _ = lib.betters(data, len(best.rows))
             top = DATA(data, top)
             results['top'].append(top)
 
             n_evals["all"] += 0
             n_evals["sway"] += evals
+            n_evals["sway2"] += evals_2
             n_evals["xpln"] += evals
+            n_evals["xpln2"] += evals_2
             n_evals["top"] += len(data.rows)
         
             for i in range(len(comparisons)):

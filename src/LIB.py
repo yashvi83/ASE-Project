@@ -11,10 +11,11 @@ from COLS import COLS
 from NUM import NUM
 
 
+
 lo = float('inf') 
 hi = float('-inf')
 
-seed = 937162211
+seed = random.random()
 smallPositive = 1E-32
 class LIB:
     def __init__(self):
@@ -261,3 +262,19 @@ class LIB:
                 r += n
         b,r = b/(nB+1/float("inf")), r/(nR+1/float("inf"))
         return (b ** 2) / (b + r)
+    
+    # def row_cleaning(self,rows):
+    #     cleaned_rows = []
+    #     for row in rows:
+    #         for item in row:
+    #             if "?" in item:
+    #                 continue
+    #     cleaned_rows.append(row)
+    #     print("cleaned rows", cleaned_rows)
+    #     return cleaned_rows
+
+    def row_cleaning(self,rows):
+        new_list = [lst for lst in rows if not any("?" in item for item in lst)]
+        my_list = [[float(val) for val in inner_list] for inner_list in new_list]
+        #print("type in row cleaning", my_list)
+        return my_list

@@ -5,7 +5,6 @@ import config
 from NUM import NUM
 from sklearn.cluster import KMeans
 import numpy as np
-from ROW import ROW
 
 num = NUM()
 lib = LIB()
@@ -63,6 +62,7 @@ class DATA:
                 return abs(x - y)
 
         d, n = 0, 1 / float("inf")
+
         cols = cols or data.cols.x
         
         for col in cols:
@@ -102,6 +102,7 @@ class DATA:
             return {'row': r, 'x': cos(gap(r, A), gap(r, B), c)}
 
         rows = rows or self.rows
+        #print("original rows", rows)
         some = lib.many(rows, config.the["Halves"])
         A = above if above and config.the["Reuse"] else lib.any(some)
    
@@ -115,29 +116,43 @@ class DATA:
             else:
                 right.append(two["row"])
         evals = 1 if (hasattr(config.the, "Reuse") and above) else 2
+        # print("old_half_A",A)
+        # print("old_half_B",B)
         return left, right, A, B,c, evals
     
-    def half_kmeans(self, data,rows=None, cols=None, above=None):
-        left, right = [], []
+    def half_kmeans(self,data,rows=None, cols=None, above=None):
+        count = 0 
+        count+=1
+        left, right = [], [] 
+        rows_numpy_arr = []
+        
         if not rows:
             rows = self.rows
-
-        rows_numpy = np.array([r.cells for r in rows])
+        for r in rows:
+            flag = True
+            for x in r:
+                if(x == "?"):
+                    flag = False
+                    break
+            if(flag):
+                rows_numpy_arr.append(r)
+        rows_numpy = np.array(rows_numpy_arr)
+        
         kmeans = KMeans(n_clusters=2, random_state=config.the['seed'], n_init=10).fit(rows_numpy)
         
-        lc = ROW(kmeans.cluster_centers_[0])
-        rc = ROW(kmeans.cluster_centers_[1])
+        lc = kmeans.cluster_centers_[0]
+        rc = kmeans.cluster_centers_[1]
         A = None
         B = None
-
+       
         def calc_min(center, row, A):
             if not A:
                 A = row
-            if self.dist(A, center) > self.dist(A, row):
+            if self.dist(self,A, center) > self.dist(self,A, row):
                 return row
             else:
                 return A
-
+        
         for idx, label in enumerate(kmeans.labels_):
             if label == 0:
                 A = calc_min(lc, rows[idx], A)
@@ -145,13 +160,7 @@ class DATA:
             else:
                 B = calc_min(rc, rows[idx], B)
                 right.append(rows[idx])
-
         return left, right, A, B
-
-
-
-
-
 
 
 

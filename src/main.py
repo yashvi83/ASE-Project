@@ -11,30 +11,40 @@ sys.stdin.reconfigure(encoding='utf-8')
 sys.stdout.reconfigure(encoding='utf-8')
 
 
-def get_stats(data_array):
-    results = {}
-    for item in data_array:
-        statistics = lib.stats(item)
-        for k, v in statistics.items():
-            results[k] = results.get(k, 0) + v
+# def get_stats(data_array):
+#     results = {}
+#     for item in data_array:
+#         statistics = lib.stats(item)
+#         for k, v in statistics.items():
+#             results[k] = results.get(k, 0) + v
+#     for k, v in results.items():
+#         results[k] /= 20
 
-    for k, v in results.items():
-        results[k] /= 20
+#     return results
+
+def get_stats(data_array):
+    n_items = len(data_array)
+    statistics = [lib.stats(item) for item in data_array]
+    results = {k: sum(stat[k] for stat in statistics) for k in statistics[0]}
+    results = {k: v/n_items for k, v in results.items()}
 
     return results
 
 def main(options,help):    
         
-        results = {"all": [], "sway": [], "sway2":[],"xpln": [],"xpln2":[], "top": []}
-        number_evals = {"all": 0, "sway": 0, "sway2": 0, "xpln": 0, "xpln2": 0, "top": 0}
-
-        comparisons = [
+        results = {"all": [], "sway": [], "sway2":[],"sway3":[],"xpln": [],"xpln2":[],"xpln3":[],"top": []}
+    
+        comparisons_table = [
             [["all", "all"], None],
             [["all", "sway"], None],
             [["all", "sway2"], None],
+            [["all", "sway3"], None],
             [["sway", "sway2"], None],
+            [["sway", "sway3"], None],
+            [["sway2", "sway3"], None],
             [["sway", "xpln"], None],
             [["sway2", "xpln2"], None],
+            [["sway3", "xpln3"], None],
             [["sway", "top"], None]
         ]
         count = 0
@@ -49,36 +59,45 @@ def main(options,help):
                 
                 best2,rest2 = OPTIMIZATION.sway_kmeans(data)
                 rule2,_ = discretization.xpln(data,best2,rest2)
+
+                best3,rest3 = OPTIMIZATION.sway_agglo(data)
+                rule3,_ = discretization.xpln(data,best3,rest3)
                 
             data1 = DATA(data, discretization.selects(rule, data.rows))
             data2 = DATA(data,discretization.selects(rule2,data.rows))
+            data3 = DATA(data,discretization.selects(rule3,data.rows))
+
             results['all'].append(data)
             results['sway'].append(best)
             results['xpln'].append(data1)
             results['sway2'].append(best2)
             results['xpln2'].append(data2)
+            results['sway3'].append(best3)
+            results['xpln3'].append(data3)
             top, _ = lib.betters(data, len(best.rows))
             top = DATA(data, top)
             results['top'].append(top)
 
-            number_evals["all"] += 0
-            number_evals["sway"] += evals
-            number_evals["sway2"] += evals
-            number_evals["xpln"] += evals
-            number_evals["xpln2"] += evals
-            number_evals["top"] += len(data.rows)
+            # number_evals["all"] += 0
+            # number_evals["sway"] += evals
+            # number_evals["sway2"] += evals
+            # number_evals["sway3"] += evals
+            # number_evals["xpln"] += evals
+            # number_evals["xpln2"] += evals
+            # number_evals["xpln3"] += evals
+            # number_evals["top"] += len(data.rows)
         
-            for i in range(len(comparisons)):
+            for i in range(len(comparisons_table)):
                     
-                    [base, diff], result = comparisons[i]
+                    [base, diff], result = comparisons_table[i]
                    
                     if result is None:
-                        comparisons[i][1] = ["=" for _ in range(len(data.cols.y))]
+                        comparisons_table[i][1] = ["=" for _ in range(len(data.cols.y))]
                         
                     for k in range(len(data.cols.y)):
                         
                         
-                        if comparisons[i][1][k] == "=":
+                        if comparisons_table[i][1][k] == "=":
                             
                             base_y, diff_y = results[base][count].cols.y[k].col, results[diff][count].cols.y[k].col
                             equals = lib.bootstrap(lib.has(base_y), lib.has(diff_y)) and lib.cliffsDelta(lib.has(base_y), lib.has(diff_y))
@@ -89,7 +108,7 @@ def main(options,help):
                                     print("WARNING: all to all {} {} {}".format(i, k, "false"))
                                     print(f"all to all comparison failed for {results[base][count].cols.y[k].col.txt}")
 
-                                comparisons[i][1][k] = "≠"
+                                comparisons_table[i][1][k] = "≠"
             count += 1
         
         
@@ -101,17 +120,14 @@ def main(options,help):
             stats = get_stats(v)
             stats_list = [k] + [stats[y] for y in headers]
 
-            
-            stats_list += [number_evals[k] / 20]
-
             table.append(stats_list)
         
-        print(tabulate(table, headers=headers + ["Avg evals"], numalign="right"))
+        print(tabulate(table, headers=headers, numalign="right"))
         print()
 
         table = []
 
-        for [base, diff], result in comparisons:
+        for [base, diff], result in comparisons_table:
             table.append([f"{base} to {diff}"] + result)
 
         print(tabulate(table, headers=headers, numalign="right"))

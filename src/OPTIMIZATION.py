@@ -22,17 +22,29 @@ def sway(data):
 def sway_kmeans(data, cols=None):
     
     def worker_sway2(rows, worse):
-        #print("data rows",rows)
         if len(rows) <= len(data.rows) ** config.the['min']:
             return rows, lib.many(worse, config.the['rest'] * len(rows))
         else:
             l, r, A, B = data.half_kmeans(data,rows, cols)
-            #l , r, A, B, c, evals = data.half(data, rows, None, above)
             if lib.better(data,B, A):
                 l, r, A, B = r, l, B, A
             for x in r:
                 worse.append(x)
             return worker_sway2(l, worse)
-    #print("data rows",data.rows)
     best, rest = worker_sway2(data.rows, [])
     return DATA(data, best), DATA(data, rest)
+
+
+def sway_agglo(data, cols=None):
+        def worker(rows, worse):
+            if len(rows) <= len(data.rows) ** config.the["min"]:
+                return rows, lib.many(worse, config.the['rest'] * len(rows))
+            else:
+                l, r, A, B = data.half_agglo(rows, cols)
+                if lib.better_multiple(data,B, A):
+                    l, r, A, B = r, l, B, A
+                for x in r:
+                    worse.append(x)
+                return worker(l, worse)
+        best, rest = worker(data.rows, [])
+        return DATA(data, best), DATA(data, rest)

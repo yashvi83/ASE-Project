@@ -239,6 +239,21 @@ class LIB:
         return s1/len(ys) < s2 / len(ys)
     
 
+    def better_multiple(self,data, rows1, rows2):
+
+        s1, s2, ys = 0, 0, data.cols.y
+        for col in ys:
+            for row1,row2 in zip(rows1,rows2):
+                n1 =  float(row1[col.col.at]) if row1[col.col.at] != "?" else row1[col.col.at]
+                n2 = float(row2[col.col.at]) if row2[col.col.at] != "?" else row2[col.col.at]
+                x = NUM.norm(NUM,col.col, n1)
+                y = NUM.norm(NUM,col.col, n2)
+
+                s1 -= math.exp(col.col.w * (x-y)/len(ys))
+                s2 -= math.exp(col.col.w * (y - x)/len(ys))
+
+        return s1/len(ys) < s2 / len(ys)
+
     # def betters(self,data,n):
     #     tmp=sorted(data.rows, key=lambda row: self.better(data,row, data.rows[data.rows.index(row)-1]))
     #     return  n and tmp[0:n], tmp[n+1:]  or tmp

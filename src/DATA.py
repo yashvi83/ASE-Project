@@ -3,8 +3,9 @@ from COLS import COLS
 import UPDATE
 import config
 from NUM import NUM
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans,AgglomerativeClustering
 import numpy as np
+import random
 
 num = NUM()
 lib = LIB()
@@ -102,7 +103,6 @@ class DATA:
             return {'row': r, 'x': cos(gap(r, A), gap(r, B), c)}
 
         rows = rows or self.rows
-        #print("original rows", rows)
         some = lib.many(rows, config.the["Halves"])
         A = above if above and config.the["Reuse"] else lib.any(some)
    
@@ -116,13 +116,9 @@ class DATA:
             else:
                 right.append(two["row"])
         evals = 1 if (hasattr(config.the, "Reuse") and above) else 2
-        # print("old_half_A",A)
-        # print("old_half_B",B)
         return left, right, A, B,c, evals
     
     def half_kmeans(self,data,rows=None, cols=None, above=None):
-        count = 0 
-        count+=1
         left, right = [], [] 
         rows_numpy_arr = []
         
@@ -136,34 +132,64 @@ class DATA:
                     break
             if(flag):
                 rows_numpy_arr.append(r)
-        rows_numpy = np.array(rows_numpy_arr)
+        rows_final = np.array(rows_numpy_arr)
         
-        kmeans = KMeans(n_clusters=2, random_state=config.the['seed'], n_init=10).fit(rows_numpy)
+        kmeans = KMeans(n_clusters=2, random_state=config.the['seed'], n_init=10).fit(rows_final)
         
         lc = kmeans.cluster_centers_[0]
         rc = kmeans.cluster_centers_[1]
         A = None
         B = None
        
-        def calc_min(center, row, A):
+        # def min_calculate(center, row, A):
+        #     if not A:
+        #         A = row
+        #     if self.dist(self,A, center) > self.dist(self,A, row):
+        #         return row
+        #     else:
+        #         return A
+
+        def min_calculate(center, row, A):
             if not A:
                 A = row
-            if self.dist(self,A, center) > self.dist(self,A, row):
-                return row
-            else:
-                return A
+            dist_to_center_A = self.dist(self, A, center)
+            dist_to_center_row = self.dist(self, row, center)
+            return row if dist_to_center_row < dist_to_center_A else A
         
-        for idx, label in enumerate(kmeans.labels_):
+        for index, label in enumerate(kmeans.labels_):
             if label == 0:
-                A = calc_min(lc, rows[idx], A)
-                left.append(rows[idx])
+                A = min_calculate(lc, rows[index], A)
+                left.append(rows[index])
             else:
-                B = calc_min(rc, rows[idx], B)
-                right.append(rows[idx])
+                B = min_calculate(rc, rows[index], B)
+                right.append(rows[index])
         return left, right, A, B
 
+    def half_agglo(self, rows=None, cols=None):
+        left, right = [], [] 
+        rows_numpy_arr = []
+        if not rows:
+            rows = self.rows
+        
+        for r in rows:
+            flag = True
+            for x in r:
+                if(x == "?"):
+                    flag = False
+                    break
+            if(flag):
+                rows_numpy_arr.append(r)
 
-
+        rows_final = np.array(rows_numpy_arr)
+        rows_final = rows_final.astype(float)
+        agglo_cluster = AgglomerativeClustering(n_clusters=2, metric='euclidean', linkage='ward').fit(rows_final)
+        for index, label in enumerate(agglo_cluster.labels_):
+            if label == 0:
+                left.append(rows[index])
+            else:
+                right.append(rows[index])
+        return left, right, random.choices(left, k=10), random.choices(right, k=10)
+    
     def tree(self,data,rows = None,cols = None,above = None):
         rows = rows or data.rows
         here = {"data" : DATA(data, rows)}

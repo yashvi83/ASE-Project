@@ -11,17 +11,6 @@ sys.stdin.reconfigure(encoding='utf-8')
 sys.stdout.reconfigure(encoding='utf-8')
 
 
-# def get_stats(data_array):
-#     results = {}
-#     for item in data_array:
-#         statistics = lib.stats(item)
-#         for k, v in statistics.items():
-#             results[k] = results.get(k, 0) + v
-#     for k, v in results.items():
-#         results[k] /= 20
-
-#     return results
-
 def get_stats(data_array):
     n_items = len(data_array)
     statistics = [lib.stats(item) for item in data_array]

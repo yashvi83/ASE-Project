@@ -252,13 +252,10 @@ class LIB:
 
         return s1/len(ys) < s2 / len(ys)
 
-    # def betters(self,data,n):
-    #     tmp=sorted(data.rows, key=lambda row: self.better(data,row, data.rows[data.rows.index(row)-1]))
-    #     return  n and tmp[0:n], tmp[n+1:]  or tmp
 
     def betters(self,data, n):
-        sorted_rows = list(sorted(data.rows, key=functools.cmp_to_key(lambda x, y: -1 if self.better(data,x, y) else 1)))
-        return sorted_rows[1:n], sorted_rows[n + 1:] if n is not None else sorted_rows
+        row_sort = list(sorted(data.rows, key=functools.cmp_to_key(lambda x, y: -1 if self.better(data,x, y) else 1)))
+        return row_sort[1:n], row_sort[n + 1:] if n is not None else row_sort
 
     def diffs(self,nums1, nums2):
         def kap(nums, fun):

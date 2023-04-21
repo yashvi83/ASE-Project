@@ -114,13 +114,12 @@ def xpln(data, best, rest):
                 if(hasattr(range,"txt")):
                     #print(range.txt, range.lo, range.hi)
                     tmp.append({"range": range, "max": len(ranges), "val": v(range.y.has)})
-    #print("tmp",tmp)
+    
     rule, most = firstN(sorted(tmp, key=lambda x: x["val"], reverse=True), score)
     return rule, most
 
 
 def firstN(sortedRanges, scoreFun):
-    #print("")
     if(len(sortedRanges)!=0):
         # for r in sortedRanges:
         #     print(r["range"].txt, r["range"].lo, r["range"].hi, round(r["val"], 2), r["range"].y.has)

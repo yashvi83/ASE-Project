@@ -26,7 +26,7 @@ def get_stats(data_array):
     n_items = len(data_array)
     statistics = [lib.stats(item) for item in data_array]
     results = {k: sum(stat[k] for stat in statistics) for k in statistics[0]}
-    results = {k: v/n_items for k, v in results.items()}
+    results = {k: v/20 for k, v in results.items()}
 
     return results
 
@@ -57,10 +57,10 @@ def main(options,help):
                 best,rest,evals = OPTIMIZATION.sway(data)
                 rule, _ = discretization.xpln(data, best, rest)
                 
-                best2,rest2 = OPTIMIZATION.sway_kmeans(data)
+                best2,rest2 = OPTIMIZATION.sway_with_kmeans(data)
                 rule2,_ = discretization.xpln(data,best2,rest2)
 
-                best3,rest3 = OPTIMIZATION.sway_agglo(data)
+                best3,rest3 = OPTIMIZATION.sway_with_agglo(data)
                 rule3,_ = discretization.xpln(data,best3,rest3)
                 
             data1 = DATA(data, discretization.selects(rule, data.rows))
@@ -78,35 +78,25 @@ def main(options,help):
             top = DATA(data, top)
             results['top'].append(top)
 
-            # number_evals["all"] += 0
-            # number_evals["sway"] += evals
-            # number_evals["sway2"] += evals
-            # number_evals["sway3"] += evals
-            # number_evals["xpln"] += evals
-            # number_evals["xpln2"] += evals
-            # number_evals["xpln3"] += evals
-            # number_evals["top"] += len(data.rows)
-        
             for i in range(len(comparisons_table)):
                     
-                    [base, diff], result = comparisons_table[i]
+                    [base, new], result = comparisons_table[i]
                    
                     if result is None:
                         comparisons_table[i][1] = ["=" for _ in range(len(data.cols.y))]
                         
                     for k in range(len(data.cols.y)):
                         
-                        
                         if comparisons_table[i][1][k] == "=":
                             
-                            base_y, diff_y = results[base][count].cols.y[k].col, results[diff][count].cols.y[k].col
-                            equals = lib.bootstrap(lib.has(base_y), lib.has(diff_y)) and lib.cliffsDelta(lib.has(base_y), lib.has(diff_y))
+                            base_y, new_y = results[base][count].cols.y[k].col, results[new][count].cols.y[k].col
+                            equals = lib.bootstrap(lib.has(base_y), lib.has(new_y)) and lib.cliffsDelta(lib.has(base_y), lib.has(new_y))
 
                             if not equals:
                                 if i == 0:
                                     
-                                    print("WARNING: all to all {} {} {}".format(i, k, "false"))
-                                    print(f"all to all comparison failed for {results[base][count].cols.y[k].col.txt}")
+                                    print("all to all {} {} {}".format(i, k, "false"))
+                                    print(f"all to all failed for {results[base][count].cols.y[k].col.txt}")
 
                                 comparisons_table[i][1][k] = "≠"
             count += 1
@@ -115,11 +105,9 @@ def main(options,help):
         headers = [y.col.txt for y in data.cols.y]
         table = []
 
-        for k, v in results.items():
-            
-            stats = get_stats(v)
-            stats_list = [k] + [stats[y] for y in headers]
-
+        for key, value in results.items():
+            stats = get_stats(value)
+            stats_list = [key] + [stats[header] for header in headers]
             table.append(stats_list)
         
         print(tabulate(table, headers=headers, numalign="right"))
@@ -127,8 +115,8 @@ def main(options,help):
 
         table = []
 
-        for [base, diff], result in comparisons_table:
-            table.append([f"{base} to {diff}"] + result)
+        for [base, new], result in comparisons_table:
+            table.append([f"{base} to {new}"] + result)
 
         print(tabulate(table, headers=headers, numalign="right"))
 

@@ -140,14 +140,6 @@ class DATA:
         rc = kmeans.cluster_centers_[1]
         A = None
         B = None
-       
-        # def min_calculate(center, row, A):
-        #     if not A:
-        #         A = row
-        #     if self.dist(self,A, center) > self.dist(self,A, row):
-        #         return row
-        #     else:
-        #         return A
 
         def min_calculate(center, row, A):
             if not A:

@@ -215,12 +215,10 @@ class LIB:
             zhat.append(z1 - zmu + xmu)
 
         tobs = self.delta(y, z)
-        #print("tobs",tobs)
         n = 0
         for i in range(config.the['bootstrap']):
             if (self.delta(NUM(t=self.samples(yhat)), NUM(t=self.samples(zhat))) > tobs):
                 n = n + 1
-        #print("after boot", n)
         return n / config.the['bootstrap'] >= config.the['conf']
 
 
@@ -239,7 +237,7 @@ class LIB:
         return s1/len(ys) < s2 / len(ys)
     
 
-    def better_multiple(self,data, rows1, rows2):
+    def better_agglo(self,data, rows1, rows2):
 
         s1, s2, ys = 0, 0, data.cols.y
         for col in ys:
@@ -278,18 +276,4 @@ class LIB:
         b,r = b/(nB+1/float("inf")), r/(nR+1/float("inf"))
         return (b ** 2) / (b + r)
     
-    # def row_cleaning(self,rows):
-    #     cleaned_rows = []
-    #     for row in rows:
-    #         for item in row:
-    #             if "?" in item:
-    #                 continue
-    #     cleaned_rows.append(row)
-    #     print("cleaned rows", cleaned_rows)
-    #     return cleaned_rows
-
-    def row_cleaning(self,rows):
-        new_list = [lst for lst in rows if not any("?" in item for item in lst)]
-        my_list = [[float(val) for val in inner_list] for inner_list in new_list]
-        #print("type in row cleaning", my_list)
-        return my_list
+   
